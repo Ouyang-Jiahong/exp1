@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from bls_fun import batch_least_squares, recursive_least_squares
+from fun import batch_least_squares, recursive_least_squares
 from data import load_matlab_v73, num_experiments, omega, random_factor
 
 # ---------------------
@@ -94,7 +94,7 @@ plt.plot(bls_factor_estimates_residuals, 'bo', label='BLS Residuals')
 plt.plot(rls_factor_estimates_random_residuals, 'r', label='RLS (random initial) Residuals')
 plt.plot(rls_factor_estimates_bls_residulas, 'g--', label='RLS (BLS initial) Residuals')
 plt.axhline(0, color='black', linestyle='--')
-plt.title("Residuals of Bias Estimation")
+plt.title("Residuals of Factor Estimation")
 plt.xlabel("Experiment Number")
 plt.ylabel("Estimate - True")
 plt.legend()
