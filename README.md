@@ -10,7 +10,7 @@
 │   ├── GyroBias.mat
 │   ├── GyroFactor.mat
 │   ├── GyroMeasData_X.mat
-├── bls_fun.py
+├── fun.py
 ├── data.py
 ├── main.py
 └── report/
@@ -19,7 +19,7 @@
 ```
 
 ## 主要文件说明
-- `bls_fun.py`：包含批量最小二乘法和递推最小二乘法的实现函数。
+- `fun.py`：包含批量最小二乘法和递推最小二乘法的实现函数。
 - `data.py`：负责加载Matlab v7.3格式的数据文件，并定义了一些实验参数。
 - `main.py`：主程序，调用`bls_fun.py`中的函数进行参数估计，并绘制结果对比图。
 - `report/`：包含实验报告的LaTeX文件。
