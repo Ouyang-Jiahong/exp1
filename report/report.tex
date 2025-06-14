@@ -1,0 +1,73 @@
+\documentclass[openany,12pt,UTF8]{ctexart}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\include{package}
+\usepackage{rotating}
+\title{实验一报告}
+\author{欧阳嘉鸿}
+\date{\today}
+\begin{document}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+\section{作业说明}
+\subsection{背景}
+\subsubsection{陀螺仪的测量模型}
+\begin{equation}
+    \label{equation:陀螺仪的测量模型}
+    \omega_{G} = \underbrace{E_{\omega 0}}_{\text{Bias}} + \underbrace{E_{\omega 1}}_{\text{Factor}} \cdot (\omega + \text{Vel}_{ver}) + \varepsilon_{G}
+\end{equation}
+
+\subsubsection{输入数据}
+\paragraph{角速度输入}\
+\begin{equation}
+    \omega = [60\quad 40\quad 50\quad 80\quad 33\quad 24\quad 17]^{\text{T}} \quad (\circ/\text{s})
+\end{equation}
+
+\paragraph{测量噪声}\
+\begin{equation}
+    \varepsilon_{G} \sim N(0,\ 1 \times 10^{-8})
+\end{equation}
+即均值为0、方差为 $1 \times 10^{-8}$ 的高斯白噪声
+
+\subsubsection{纬度与垂直方向角速度}
+\paragraph{地理纬度（PhiN）}\
+\begin{equation}
+    \text{PhiN} = 28.209167\ ^\circ
+\end{equation}
+\paragraph{垂直方向角速度（考虑地球自转）}\
+\begin{equation}
+    \text{Vel}_{ver} = 7.292 \times 10^{-5} \times \text{r2d} \times \sin(\text{PhiN} \times \text{d2r})
+\end{equation}
+其中：
+\begin{itemize}
+    \item \texttt{r2d} 表示将弧度转换为角度（即 $180/\pi$）
+    \item \texttt{d2r} 表示将角度转换为弧度（即 $\pi/180$）
+\end{itemize}
+
+\paragraph{采样步长}\
+
+0.01秒
+
+\subsection{数据格式说明}
+\subsubsection{GyroMeasData\_X.mat}
+在\texttt{GyroMeasData\_X.mat}中，存储了500×7的double数据，每一组数据1×7代表了一组\(\omega\)观测数据。X代表了实验的组数，从0-100。我们要利用X组实验中的500次观测数据进行Bias和Factor的估计，估计式如\autoref{equation:陀螺仪的测量模型}所示。
+\subsubsection{GyroBias.mat}
+在\texttt{GyroBias.mat}中，存储了1×100的double数据，每一组数据代表了一个实验的Bias真值。例如GyroBias[1]代表了X=1时的Bias真值，也就是对应GyroMeasData\_1.mat的实验的真值。
+在利用\texttt{GyroMeasData\_X.mat}的数据求解处\texttt{estimate\_{bias}}之后，要与真值进行对比。
+\subsubsection{GyroFactor.mat}
+在\texttt{GyroFactor.mat}中，存储了1×100的double数据，每一组数据代表了一个实验的Factor真值。例如GyroFactor[1]代表了X=1时的Factor真值，也就是对应GyroMeasData\_1.mat的实验的真值。
+在利用\texttt{GyroMeasData\_X.mat}的数据求解处\texttt{estimate\_{factor}}之后，要与真值进行对比。
+\subsection{任务}
+\begin{enumerate}
+    \item 请使用批量最小二乘法（Batch LS）和递推最小二乘法（RLS）来估计陀螺仪的偏差（bias）和标度因子（scale factor），并比较这两种估计方法的结果。
+    \item 当使用批量最小二乘法（Batch LS）时，请估计测量噪声的方差。
+    \item 当使用递推最小二乘法（RLS）时，请通过仿真回答以下问题：
+          \begin{itemize}
+              \item 当初始参数设置为批量最小二乘（BLS）解时，与初始参数随机设定时，估计误差曲线会如何变化？
+              \item 参数估计误差曲线受初始条件的影响是怎样的？
+          \end{itemize}
+\end{enumerate}
+
+\end{document}
