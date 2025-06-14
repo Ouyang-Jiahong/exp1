@@ -116,12 +116,12 @@ In \texttt{GyroFactor.mat}, there is a 1×100 double-precision data array. Each 
 \section{Introduction of the algorithm investigated}
 In this study, we investigate and compare two classical parameter estimation techniques applied to the calibration of gyroscope measurements: \textbf{Batch Least Squares (BLS)} and \textbf{Recursive Least Squares (RLS)}. The target is to jointly estimate the bias and scale factor (denoted as "factor") of a multi-channel gyroscope, based on synthetic measurement data generated from known ground truth parameters and corrupted with realistic noise.
 
-The underlying measurement model assumes that the observed gyroscope readings $\omega\_G$ are linearly related to the true angular rate input $\omega$ via the relation:
+The underlying measurement model assumes that the observed gyroscope readings $\omega_G$ are linearly related to the true angular rate input $\omega$ via the relation:
 $$
 \omega_G = \text{bias} + \text{factor} \cdot (\omega + \omega_E)
 $$
 
-where $\omega\_E$ denotes the effect of Earth's rotation in the local vertical direction, accounted for using the latitude of the test site. This correction is computed as:
+where $\omega_E$ denotes the effect of Earth's rotation in the local vertical direction, accounted for using the latitude of the test site. This correction is computed as:
 $$
 \omega_E = 7.292 \times 10^{-5} \cdot \frac{180}{\pi} \cdot \sin(\phi)
 $$
