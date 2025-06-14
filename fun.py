@@ -2,7 +2,6 @@ import numpy as np
 
 from data import Vel_ver
 
-
 # ---------------------
 # 批量最小二乘法（BLS）函数
 # ---------------------
@@ -19,8 +18,8 @@ def batch_least_squares(data, omega_input):
         factor_est (float): 估计的 Factor
         var_noise_est (float): 估计的测量噪声方差
     """
-    num_samples = data.shape[0]  # 应该是500
-    num_axes = data.shape[1]     # 应该是7
+    num_samples = data.shape[0]
+    num_axes = data.shape[1]
 
     # 构造设计矩阵 A 和观测向量 y
     A = np.zeros((num_samples * num_axes, 2))
