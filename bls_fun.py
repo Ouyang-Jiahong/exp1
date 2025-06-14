@@ -106,7 +106,4 @@ def recursive_least_squares(data_matrix, omega_input, init_guess=None, lambda_=1
             bias_estimates.append(theta[0])
             factor_estimates.append(theta[1])
 
-        # 计算残差用于估计噪声方差
-
-
     return bias_estimates, factor_estimates
