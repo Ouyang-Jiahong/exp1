@@ -1,6 +1,43 @@
-\documentclass[openany,12pt,UTF8]{ctexart}
+\documentclass[openany,12pt,UTF8]{article}
 \usepackage[a4paper,margin=2.5cm]{geometry}
 \include{package}
+
+% ----------------------------
+% 代码显示相关宏包
+% ----------------------------
+\usepackage{listings}     % 代码高亮
+
+% ----------------------------
+% 设置代码样式
+% ----------------------------
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{backcolor}{rgb}{0.95,0.95,0.95}
+\definecolor{codeblue}{rgb}{0.2,0.2,0.6}
+\definecolor{keywordcolor}{rgb}{0.1,0.1,0.6}
+\definecolor{stringcolor}{rgb}{0.58,0,0.1}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolor},   
+    commentstyle=\color{codegray}\itshape,
+    keywordstyle=\color{keywordcolor}\bfseries,
+    stringstyle=\color{stringcolor},
+    numberstyle=\tiny\color{gray},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,                     
+    captionpos=b,                        
+    keepspaces=true,
+    numbers=left,                        
+    numbersep=5pt,                       
+    showspaces=false,                    
+    showstringspaces=false,
+    showtabs=false,                      
+    tabsize=4,
+    language=Python
+}
+
+% 设置默认样式
+\lstset{style=pythonstyle}
+
 \usepackage{rotating}
 \title{Simulation Practice Report for Statistics of Flight Experiment}
 \author{Ouyang Jiahong}
@@ -12,139 +49,150 @@
 \newpage
 
 \section{Introduction of the simulation task}
-\subsection{背景}
-\subsubsection{陀螺仪的测量模型}
+In this project, we investigate two classical parameter estimation techniques—Batch Least Squares (BLS) and Recursive Least Squares (RLS)—to estimate the bias and scale factor of gyroscope sensors. The BLS method solves a global least squares optimization problem over all available data, yielding a static estimate of the parameters. In contrast, the RLS algorithm updates the parameter estimates incrementally with each new observation, making it suitable for real-time or adaptive scenarios.
+
+Both methods consider the impact of the Earth's rotation on the gyroscope's output by incorporating a correction term based on latitude. Experiments are conducted using a dataset consisting of 50 groups of measurements, each containing 500 samples from a 7-channel gyroscope. The estimation results from BLS and RLS—with different initialization strategies—are compared in terms of residual errors and convergence behavior.
+
+\subsection{Background}
+\subsubsection{Gyroscope Measurement Model}
 \begin{equation}
-    \label{equation:陀螺仪的测量模型}
+    \label{equation:Gyroscope Measurement Model}
     \omega_{G} = \underbrace{E_{\omega 0}}_{\text{Bias}} + \underbrace{E_{\omega 1}}_{\text{Factor}} \cdot (\omega + \text{Vel}_{ver}) + \varepsilon_{G}
 \end{equation}
 
-\subsubsection{输入数据}
-\paragraph{角速度输入}\
+\subsubsection{Input Data}
+\paragraph{Angular Velocity Input}\
 \begin{equation}
     \omega = [60\ 40\ 50\ 80\ 33\ 24\ 17]^{\text{T}} \ (\circ/\text{s})
 \end{equation}
 
-\paragraph{测量噪声}\
+\paragraph{Measurement Noise}\
 \begin{equation}
     \varepsilon_{G} \sim N(0,\ 1 \times 10^{-8})
 \end{equation}
-即均值为0、方差为 $1 \times 10^{-8}$ 的高斯白噪声
+This represents a Gaussian white noise with zero mean and variance of $1 \times 10^{-8}$.
 
-\subsubsection{纬度与垂直方向角速度}
-\paragraph{地理纬度（PhiN）}\
+\subsubsection{Latitude and Vertical Angular Velocity}
+\paragraph{Geographic Latitude (PhiN)}\
 \begin{equation}
     \text{PhiN} = 28.209167\ ^\circ
 \end{equation}
-\paragraph{垂直方向角速度（考虑地球自转）}\
+
+\paragraph{Vertical Angular Velocity (Considering Earth's Rotation)}\
 \begin{equation}
     \text{Vel}_{ver} = 7.292 \times 10^{-5} \times \text{r2d} \times \sin(\text{PhiN} \times \text{d2r})
 \end{equation}
-其中：
+Where:
 \begin{itemize}
-    \item \texttt{r2d} 表示将弧度转换为角度（即 $180/\pi$）
-    \item \texttt{d2r} 表示将角度转换为弧度（即 $\pi/180$）
+    \item \texttt{r2d} denotes conversion from radians to degrees (i.e., $180/\pi$)
+    \item \texttt{d2r} denotes conversion from degrees to radians (i.e., $\pi/180$)
 \end{itemize}
 
-\paragraph{采样步长}\
+\paragraph{Sampling Step}\
 
-0.01秒
+0.01 seconds
 
-\subsection{任务}
+\subsection{Assignment}
 \begin{enumerate}
-    \item 请使用批量最小二乘法（Batch LS）和递推最小二乘法（RLS）来估计陀螺仪的偏差（bias）和标度因子（scale factor），并比较这两种估计方法的结果。
-    \item 当使用批量最小二乘法（Batch LS）时，请估计测量噪声的方差。
-    \item 当使用递推最小二乘法（RLS）时，请通过仿真回答以下问题：
+    \item Please estimate the bias and factor of a gyro using batch LS and RLS, and compare the estimation solutions.
+    \item When the batch LS is employed, please estimate the variance of measurement noise.
+    \item When the RLS is employed, please answer the following questions by simulations:
           \begin{itemize}
-              \item 当初始参数设置为批量最小二乘（BLS）解时，与初始参数随机设定时，估计误差曲线会如何变化？
-              \item 参数估计误差曲线受初始条件的影响是怎样的？
+              \item How the estimation error curve will vary when the initial parameter is set as the BLS solution and when the initial parameter is randomly set?
+              \item How the estimation error curve of parameter is affected by the initial conditions?
           \end{itemize}
 \end{enumerate}
 
-\subsection{所提供的数据格式说明}
+\subsection{Description of Provided Data Formats}
 \subsubsection{GyroMeasData\_X.mat}
-在\texttt{GyroMeasData\_X.mat}中，存储了500×7的double数据，每一组数据1×7代表了一组\(\omega\)观测数据。X代表了实验的组数，从0-100。我们要利用X组实验中的500次观测数据进行Bias和Factor的估计，估计式如\autoref{equation:陀螺仪的测量模型}所示。
-\subsubsection{GyroBias.mat}
-在\texttt{GyroBias.mat}中，存储了1×100的double数据，每一组数据代表了一个实验的Bias真值。例如GyroBias[1]代表了X=1时的Bias真值，也就是对应GyroMeasData\_1.mat的实验的真值。
-在利用\texttt{GyroMeasData\_X.mat}的数据求解处\texttt{estimate\_{bias}}之后，要与真值进行对比。
-\subsubsection{GyroFactor.mat}
-在\texttt{GyroFactor.mat}中，存储了1×100的double数据，每一组数据代表了一个实验的Factor真值。例如GyroFactor[1]代表了X=1时的Factor真值，也就是对应GyroMeasData\_1.mat的实验的真值。
-在利用\texttt{GyroMeasData\_X.mat}的数据求解处\texttt{estimate\_{factor}}之后，要与真值进行对比。
+In \texttt{GyroMeasData\_X.mat}, there is a 500×7 double-precision data matrix. Each row of data (1×7) represents one observation of $\omega$. X represents the experiment number, ranging from 0 to 100. We will use the 500 observations from X experiments to estimate Bias and Factor, as shown in \autoref{equation:Gyroscope Measurement Model}.
 
+\subsubsection{GyroBias.mat}
+In \texttt{GyroBias.mat}, there is a 1×100 double-precision data array. Each element represents the true value of Bias for one experiment. For example, GyroBias[1] represents the Bias true value for X=1, which corresponds to the experiment stored in GyroMeasData\_1.mat. After estimating \texttt{estimate\_bias} using data from \texttt{GyroMeasData\_X.mat}, it should be compared with the true values.
+
+\subsubsection{GyroFactor.mat}
+In \texttt{GyroFactor.mat}, there is a 1×100 double-precision data array. Each element represents the true value of Factor for one experiment. For example, GyroFactor[1] represents the Factor true value for X=1, corresponding to the experiment in GyroMeasData\_1.mat. After calculating \texttt{estimate\_factor} using data from \texttt{GyroMeasData\_X.mat}, it should be compared with the true values.
 
 \section{Introduction of the algorithm investigated}
+In this study, we investigate and compare two classical parameter estimation techniques applied to the calibration of gyroscope measurements: \textbf{Batch Least Squares (BLS)} and \textbf{Recursive Least Squares (RLS)}. The target is to jointly estimate the bias and scale factor (denoted as "factor") of a multi-channel gyroscope, based on synthetic measurement data generated from known ground truth parameters and corrupted with realistic noise.
+
+The underlying measurement model assumes that the observed gyroscope readings $\omega\_G$ are linearly related to the true angular rate input $\omega$ via the relation:
+$$
+\omega_G = \text{bias} + \text{factor} \cdot (\omega + \omega_E)
+$$
+
+where $\omega\_E$ denotes the effect of Earth's rotation in the local vertical direction, accounted for using the latitude of the test site. This correction is computed as:
+$$
+\omega_E = 7.292 \times 10^{-5} \cdot \frac{180}{\pi} \cdot \sin(\phi)
+$$
+with $\phi$ representing the latitude (here, $\phi = 28.209167^\circ$).
+
+The \textbf{Batch Least Squares (BLS)} method estimates the bias and factor parameters by stacking all measurement equations into a single linear system and solving it via the normal equations. It is a non-iterative method that leverages all available data at once to obtain a point estimate.
+
+In contrast, the \textbf{Recursive Least Squares (RLS)} method updates the parameter estimates iteratively with each new observation. It is particularly useful in online or real-time estimation scenarios, where measurements arrive sequentially. The RLS algorithm uses a gain matrix and an evolving estimate covariance matrix to balance prior knowledge with new observations. In our implementation, we initialize RLS with either a random guess perturbed by a small factor, or with the result from the BLS estimate, to examine the sensitivity of convergence.
+
+Experimental evaluation is conducted on 50 synthetic datasets, each containing 500 measurements across 7 axes. The effectiveness of both algorithms is assessed in terms of estimation accuracy (residuals compared to ground truth) and convergence speed. Visualization of residuals and convergence behavior provides insights into estimator performance under different initialization conditions.
 
 \section{Results and Analysis}
 
-\subsection{Results of simulations}
-\subsubsection{Residuals of Bias Estimation}
-\autoref{figure:Residuals of Bias Estimation}是一张“偏差估计残差”（Residuals of Bias Estimation）的图表。横坐标为“实验编号”（Experiment Number），范围是0 - 50；纵坐标为“估计值 - 真实值”（Estimate - True），数量级为10⁻⁶ ，范围大致在 -4到8之间。图中有三种数据系列：
-“BLS残差”（BLS Residuals），以蓝色圆点表示；
-“RLS（随机初始）残差”（RLS (random initial) Residuals），用红色实线表示；
-“RLS（BLS初始）残差”（RLS (BLS initial) Residuals），由绿色虚线呈现。
+\subsection{Results of Simulations}
 
-图中0值处有一条黑色虚线作为参考线，展示了不同方法的残差在各实验编号下的波动情况。 可以看到不同方法的残差在各实验编号下的波动情况都非常小，在1e-6以内。
+\subsubsection{Residuals of Bias Estimation}
+\autoref{figure:Residuals of Bias Estimation} shows the bias estimation residuals across 50 experiments. All methods—BLS (blue circles), RLS with random initialization (red lines), and RLS with BLS initialization (green dashed lines)—exhibit residuals within $10^{-6}$. A black dashed zero-line serves as reference.
+
 \begin{figure}[h]\centering
-    \includegraphics[width=\columnwidth]{figures/Residuals of Bias Estimation.png}
-    \caption{Residuals of Bias Estimation}
-    \label{figure:Residuals of Bias Estimation}
+\includegraphics[width=\columnwidth]{figures/Residuals of Bias Estimation.png}
+\caption{Residuals of Bias Estimation}
+\label{figure:Residuals of Bias Estimation}
 \end{figure}
 
 \subsubsection{Residuals of Factor Estimation}
-\autoref{figure:Residuals of Factor Estimation}一张“因子估计残差”（Residuals of Factor Estimation）的折线图和散点图。横坐标是“实验编号”（Experiment Number），范围从0到50；纵坐标是“估计值 - 真实值”（Estimate - True），范围约从 -2.0×10⁻⁷到1.0×10⁻⁷。图中有三种数据系列：
-“BLS残差”（BLS Residuals），用蓝色圆点表示；
-“RLS（随机初始）残差”（RLS (random initial) Residuals），用红色实线表示；
-“RLS（BLS初始）残差”（RLS (BLS initial) Residuals），用绿色虚线表示。
+\autoref{figure:Residuals of Factor Estimation} presents the factor estimation residuals. All methods maintain residuals within $10^{-7}$, showing similarly high accuracy. Series labels and formatting are consistent with the previous figure.
 
-可以看到不同方法的残差在各实验编号下的波动情况都非常小，在1e-7以内，0值处有一条黑色虚线作为参考线。 
 \begin{figure}[h]\centering
-    \includegraphics[width=\columnwidth]{figures/Residuals of Factor Estimation.png}
-    \caption{Residuals of Factor Estimation}
-    \label{figure:Residuals of Factor Estimation}
+\includegraphics[width=\columnwidth]{figures/Residuals of Factor Estimation.png}
+\caption{Residuals of Factor Estimation}
+\label{figure:Residuals of Factor Estimation}
 \end{figure}
 
 \subsubsection{Bias and Factor Estimation of Exp 1}
-\autoref{figure:Bias and Factor Estimation of Exp 1}包含两个子图，分别展示偏差估计收敛和因子估计收敛情况，均为实验1（Exp 1）的结果。可以看到，通过引入BLS的结果作为RLS的初值，可以稍微加快结果收敛的速度，但是在这个实验中显示的不明显。
+\autoref{figure:Bias and Factor Estimation of Exp 1} illustrates convergence behavior in a single experiment. Initializing RLS with BLS slightly improves convergence speed, though the effect is limited. True values are shown as black dashed lines.
 
-左侧子图标题为“Bias Estimation Convergence - Exp 1”（偏差估计收敛 - 实验1）。横坐标是“Iteration Step”（迭代步骤），范围从0到8；纵坐标是“Bias Estimate”（偏差估计），范围从0到0.008。图中有三条线：
-红色实线代表“RLS Random Init”（RLS随机初始化）；
-蓝色实线代表“RLS BLS Init”（RLS以BLS初始化）；
-黑色虚线代表“True Bias”（真实偏差）。
-
-右侧子图标题为“Factor Estimation Convergence - Exp 1”（因子估计收敛 - 实验1）。横坐标同样是“Iteration Step”（迭代步骤），范围从0到8；纵坐标是“Factor Estimate”（因子估计），范围从 -0.00014到0。图中也有三条线：
-红色实线代表“RLS Random Init”（RLS随机初始化）；
-蓝色实线代表“RLS BLS Init”（RLS以BLS初始化）；
-黑色虚线代表“True Factor”（真实因子）。 
 \begin{figure}[h]\centering
-    \includegraphics[width=\columnwidth]{figures/Bias and Factor Estimation of Exp 1.png}
-    \caption{Bias and Factor Estimation of Exp 1}
-    \label{figure:Bias and Factor Estimation of Exp 1}
+\includegraphics[width=\columnwidth]{figures/Bias and Factor Estimation of Exp 1.png}
+\caption{Bias and Factor Estimation of Exp 1}
+\label{figure:Bias and Factor Estimation of Exp 1}
 \end{figure}
 
 \subsubsection{Bias and Factor Estimation of All Exp}
-\autoref{figure:Bias and Factor Estimation of All Exp}包含两个子图，分别展示所有实验的偏差估计收敛和因子估计收敛情况。可以看出，所有组实验数据的结果类似。
+\autoref{figure:Bias and Factor Estimation of All Exp} summarizes convergence trends across all experiments. Both RLS variants ultimately approach the true values. RLS with BLS initialization converges slightly faster and more smoothly.
 
-左侧子图标题为“Bias Estimation Convergence (All Experiments)”（所有实验的偏差估计收敛）。横坐标是“Iteration Step”（迭代步骤），范围从0到8；纵坐标是“Bias Estimate Error”（偏差估计误差），范围从0到0.008。图中有三种线条：
- 红色线条代表“RLS Random Init”（RLS随机初始化）；
- 蓝色线条代表“RLS BLS Init”（RLS以BLS初始化）；
- 黑色虚线代表“True Bias”（真实偏差）。
-有多条同色线条交织，显示多次实验的结果。
-
-右侧子图
-标题为“Factor Estimation Convergence (All Experiments)”（所有实验的因子估计收敛）。横坐标是“Iteration Step”（迭代步骤），范围从0到8；纵坐标是“Factor Estimate Error”（因子估计误差），范围从 -0.00015到0.000025。图中同样有三种线条：
-红色线条代表“RLS Random Init”（RLS随机初始化）；
- 蓝色线条代表“RLS BLS Init”（RLS以BLS初始化）；
- 黑色虚线代表“True Factor”（真实因子）。
-有多条同色线条交织，展示多次实验的结果。 
 \begin{figure}[h]\centering
-    \includegraphics[width=\columnwidth]{figures/Bias and Factor Estimation of All Exp.png}
-    \caption{Bias and Factor Estimation of All Exp}
-    \label{figure:Bias and Factor Estimation of All Exp}
+\includegraphics[width=\columnwidth]{figures/Bias and Factor Estimation of All Exp.png}
+\caption{Bias and Factor Estimation of All Exp}
+\label{figure:Bias and Factor Estimation of All Exp}
 \end{figure}
 
 \subsection{Analysis}
+From the results above, both BLS and RLS yield highly accurate estimations, with residuals consistently within the magnitude of $10^{-6}$ for bias and $10^{-7}$ for factor across 50 experiments. This suggests that the problem is well-conditioned and the measurement noise is sufficiently small, enabling robust estimation by both methods.
 
-\section{Appendix}
-Paste your code here.
+Second, the RLS method initialized with BLS results shows slightly faster convergence compared to RLS with random initialization. As shown in \autoref{figure:Bias and Factor Estimation of Exp 1} and \autoref{figure:Bias and Factor Estimation of All Exp}, the improvement is marginal in these experiments. In theory, RLS with BLS initialization should achieve smoother and more stable convergence, as a good prior helps accelerate learning and reduces transient fluctuations.
 
+Third, there is negligible difference in the final estimation accuracy between the two RLS variants. After sufficient iterations, both converge to results nearly identical to those from BLS. This confirms the theoretical expectation that RLS asymptotically approaches BLS given enough data, assuming the measurement model remains linear and the noise characteristics are stationary.
+
+In conclusion, both BLS and RLS are effective in this scenario. While BLS provides a reliable offline solution, RLS offers the added benefit of online adaptability. Initializing RLS with BLS results can marginally improve convergence speed, which may be advantageous in real-time applications.
+
+\section*{Appendix: Python Code}
+
+\subsection*{A.1 Core Algorithm Implementation}
+
+\lstinputlisting[language=Python,caption={Main Estimation Algorithm Implementation}]{../fun.py}
+
+\subsection*{A.2 Data Processing Module}
+
+\lstinputlisting[language=Python,caption={Data Processing Module}]{../data.py}
+
+\subsection*{A.3 Function Main Entry \& Visualization Module}
+
+\lstinputlisting[language=Python,caption={Function Main Entry \& Visualization Module}]{../main.py}
 \end{document}
