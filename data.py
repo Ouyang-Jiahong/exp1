@@ -10,7 +10,7 @@ d2r = np.pi / 180
 Vel_ver = 7.292e-5 * r2d * np.sin(PhiN * d2r)  # 垂直方向地球自转角速度
 omega = np.array([60, 40, 50, 80, 33, 24, 17])  # 输入角速度 (7 维)
 num_experiments = 50  # 实验组数从 0 到 99
-random_factor = np.random.rand(2) * 0.5 # 用于给RLS的初值加随机变量
+random_factor = np.random.rand(2) * 0.01 # 用于给RLS的初值加随机变量
 
 def load_matlab_v73(file_path):
     data = {}
